@@ -39,6 +39,28 @@ mcp.addTool({
     }
 })
 
+mcp.addTool({
+    name: "retrieve-expense",
+    description: "Retrieve all the expenses from database",
+    execute: async () => {
+        try {
+            const expenses = await Expense.find({}).lean()
+            return {
+                content: [
+                    { type: "text", text: JSON.stringify(expenses) }
+                ]
+            }
+        } catch (error) {
+            console.error('Error retrieving expenses:', error)
+            return {
+                content: [
+                    { type: "text", text: `Error retrieving expenses: ${error instanceof Error ? error.message : 'Unknown error'}` }
+                ]
+            }
+        }
+    }
+})
+
 mcp.start({
     transportType: "stdio"
 })
