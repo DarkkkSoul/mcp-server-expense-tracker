@@ -1,7 +1,7 @@
 import { FastMCP } from "fastmcp";
 import z from "zod";
-import { connectToDB } from "./db/connect.ts";
-import { Expense } from "./db/schema.ts";
+import { connectToDB } from "./db/connect.js";
+import { Expense } from "./db/schema.js";
 
 const mcp = new FastMCP({
     name: "expense-tracker",
