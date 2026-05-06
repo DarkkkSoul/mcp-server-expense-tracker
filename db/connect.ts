@@ -1,7 +1,7 @@
 import dotenv from "dotenv"
 import mongoose from "mongoose"
 
-dotenv.config()
+dotenv.config({ path: "/home/kiouni/Desktop/mcp-expense-tracker/.env" })
 
 export const connectToDB = async (): Promise<void> => {
     if (!process.env.DB_URI) {
