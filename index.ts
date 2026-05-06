@@ -11,7 +11,7 @@ const mcp = new FastMCP({
 await connectToDB()
 
 mcp.addTool({
-    name: "Add Expense",
+    name: "add-expense",
     description: "Adding expense to Database",
     parameters: z.object({
         expense: z.number(),

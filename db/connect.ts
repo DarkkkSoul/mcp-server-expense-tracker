@@ -10,7 +10,7 @@ export const connectToDB = async (): Promise<void> => {
 
     // Check if already connected
     if (mongoose.connection.readyState === 1) {
-        console.log("*****DATABASE ALREADY CONNECTED*****")
+        console.error("*****DATABASE ALREADY CONNECTED*****")
         return
     }
 
@@ -22,7 +22,7 @@ export const connectToDB = async (): Promise<void> => {
             retryWrites: true,
             w: 'majority',
         })
-        console.log("*****DATABASE CONNECTED*****")
+        console.error("*****DATABASE CONNECTED*****")
     } catch (error) {
         console.error("ERROR CONNECTING TO DB:", error)
         throw error
