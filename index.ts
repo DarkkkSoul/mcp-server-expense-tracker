@@ -1,14 +1,14 @@
 import { FastMCP } from "fastmcp";
 import z from "zod";
-import { connectToDB } from "./db/connect";
-import { Expense } from "./db/schema";
+import { connectToDB } from "./db/connect.ts";
+import { Expense } from "./db/schema.ts";
 
 const mcp = new FastMCP({
     name: "expense-tracker",
     version: "1.0.0"
 })
 
-connectToDB()
+await connectToDB()
 
 mcp.addTool({
     name: "Add Expense",
@@ -20,13 +20,21 @@ mcp.addTool({
         description: z.string()
     }),
     execute: async (args) => {
+        try {
+            const expense = await Expense.create(args)
 
-        const expense = await Expense.create(args)
-
-        return {
-            content: [
-                { type: "text", text: `Expense ${args.expense} added` }
-            ]
+            return {
+                content: [
+                    { type: "text", text: `Expense ${args.expense} added successfully with ID: ${expense._id}` }
+                ]
+            }
+        } catch (error) {
+            console.error('Error creating expense:', error)
+            return {
+                content: [
+                    { type: "text", text: `Error adding expense: ${error instanceof Error ? error.message : 'Unknown error'}` }
+                ]
+            }
         }
     }
 })

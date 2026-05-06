@@ -8,10 +8,23 @@ export const connectToDB = async (): Promise<void> => {
         throw new Error("DB_URI environment variable is not defined")
     }
 
+    // Check if already connected
+    if (mongoose.connection.readyState === 1) {
+        console.log("*****DATABASE ALREADY CONNECTED*****")
+        return
+    }
+
     try {
-        await mongoose.connect(process.env.DB_URI)
+        await mongoose.connect(process.env.DB_URI, {
+            serverSelectionTimeoutMS: 10000,
+            socketTimeoutMS: 45000,
+            maxPoolSize: 10,
+            retryWrites: true,
+            w: 'majority',
+        })
         console.log("*****DATABASE CONNECTED*****")
     } catch (error) {
-        console.log("ERROR CONNECTING TO DB:", error)
+        console.error("ERROR CONNECTING TO DB:", error)
+        throw error
     }
 }
