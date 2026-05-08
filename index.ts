@@ -61,6 +61,48 @@ mcp.addTool({
     }
 })
 
+mcp.addTool({
+    name: "remove-expense",
+    description: "Remove an expense from the database. At least one of category, date, or description must be provided. Partial, case-insensitive matches work for category and description.",
+    parameters: z.object({
+        category: z.string().optional(),
+        date: z.string().optional(),
+        description: z.string().optional()
+    }),
+    execute: async (args) => {
+        try {
+            const query: Record<string, unknown> = {}
+
+            if (args.date) query.date = args.date
+            if (args.category) query.category = { $regex: args.category, $options: "i" }
+            if (args.description) query.description = { $regex: args.description, $options: "i" }
+
+            const deleted = await Expense.findOneAndDelete(query)
+
+            if (!deleted) {
+                return {
+                    content: [
+                        { type: "text", text: "No matching expense found to delete." }
+                    ]
+                }
+            }
+
+            return {
+                content: [
+                    { type: "text", text: `Deleted expense: ${deleted.expense} on ${deleted.date} for "${deleted.category}" ("${deleted.description || "N/A"}")` }
+                ]
+            }
+        } catch (error) {
+            console.error("Error deleting an expense", error)
+            return {
+                content: [
+                    { type: "text", text: `Error deleting an expense: ${error instanceof Error ? error.message : "Unknown error"}` }
+                ]
+            }
+        }
+    }
+})
+
 mcp.start({
     transportType: "stdio"
 })
