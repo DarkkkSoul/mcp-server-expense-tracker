@@ -41,10 +41,39 @@ mcp.addTool({
 
 mcp.addTool({
     name: "retrieve-expense",
-    description: "Retrieve all the expenses from database",
-    execute: async () => {
+    description: "Retrieve all the expenses from database either by date range or by category or by both category and date ",
+    parameters: z.object({
+        category: z.string().optional(),
+        date: z.string().optional(),
+        startDate: z.string().optional(),
+        endDate: z.string().optional(),
+    }),
+    execute: async (args) => {
         try {
-            const expenses = await Expense.find({}).lean()
+
+            const query: Record<string, any> = {}
+
+            if (args.startDate || args.startDate) {
+                query.date = {}
+                if (args.startDate) query.date.$gte = args.startDate
+                if (args.endDate) query.date.$lte = args.endDate
+            }
+            else if (args.date) {
+                query.date = { $regex: args.date, $options: "i" }
+            }
+
+            if (args.category) query.category = { $regex: args.category, $options: "i" }
+
+            const expenses = await Expense.find(query).lean()
+
+            if (expenses.length === 0) {
+                return {
+                    content: [
+                        { type: "text", text: "No matching expense found." }
+                    ]
+                }
+            }
+
             return {
                 content: [
                     { type: "text", text: JSON.stringify(expenses) }
