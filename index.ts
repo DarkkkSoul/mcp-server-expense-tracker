@@ -133,5 +133,8 @@ mcp.addTool({
 })
 
 mcp.start({
-    transportType: "stdio"
+    transportType: "httpStream",
+    httpStream: {
+        port: 3001
+    }
 })
