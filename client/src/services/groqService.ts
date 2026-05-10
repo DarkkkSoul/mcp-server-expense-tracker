@@ -1,5 +1,4 @@
 import Groq from 'groq-sdk';
-import { tools, mcpClient } from "../mcp/client";
 
 const groq = new Groq({ apiKey: import.meta.env.VITE_GROQ_API_KEY, dangerouslyAllowBrowser: true });
 
@@ -8,10 +7,29 @@ export interface GroqMessage {
   content: string;
 }
 
+// Fetch tools from API
+async function getTools() {
+  const response = await fetch('http://localhost:3002/api/tools');
+  const data = await response.json();
+  return data.tools;
+}
+
+// Call MCP tool via API
+async function callTool(name: string, args: any) {
+  const response = await fetch('http://localhost:3002/api/tools/call', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, arguments: args })
+  });
+  return await response.json();
+}
+
 export async function sendMessageToGroq(
   messages: GroqMessage[]
 ): Promise<string> {
   try {
+    const tools = await getTools();
+
     const response = await groq.chat.completions.create({
       messages: messages,
       model: 'llama-3.3-70b-versatile',
@@ -32,7 +50,7 @@ export async function sendMessageToGroq(
       const toolName = tool.function.name
       const toolArgs = JSON.parse(tool.function.arguments)
 
-      const mcpResult = await mcpClient.callTool({ name: toolName, arguments: toolArgs })
+      const mcpResult = await callTool(toolName, toolArgs)
 
       const secondResponse = await groq.chat.completions.create({
         messages: [
